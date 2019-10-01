@@ -1,6 +1,7 @@
 $(document)
     .ready(function () {
         const myListAll = [];
+        var initVal = 0;
         const generateToDo = (element) => `<li id=${element.id} class="${element.complete? "checked": ""}"><input name="done-todo" ${element.complete? 'checked': ""} type="checkbox" class="done-todo" /><span> ${element.name}</span> </li>`
 
         function generateUUID() {
@@ -24,15 +25,13 @@ $(document)
 
         $('#button').click(function(){
             var value = $('input[name=ListItem]').val();
-            myListAll.push({id: generateUUID(), name: value, checked: "checked"});
+            myListAll.push({id: generateUUID(), name: value, checked: ""});
             showlist();
             $('input[name=ListItem]').val("");
         });
 
          function showlist() {
-            const html = myListAll
-            .map(element => generateToDo(element))
-//          .reduce((element1, element2) => element1 + element2, "");
+            const html = myListAll.map(element => generateToDo(element))
             $('ol').html(html);
          }
 
@@ -45,22 +44,32 @@ $(document)
 
       $("#filters li a").click(function () {
           var customType = $(this).data('filter');
-          console.log(customType);
           if(customType == 'all')
           {
-               console.log('1');
                $("li").filter(".checked").show();
+               $("ol li:not(.checked)").show();
           }
           else if(customType == 'active')
           {
-                console.log('2');
                 $("li").filter(".checked").hide();
+                $("ol li:not(.checked)").show();
           }
           else
           {
-                console.log('3');
-                $("li:not(.checked)").hide();
                 $("li").filter(".checked").show();
+                $("ol li:not(.checked)").hide();
           }
       });
-});
+
+      $(document).on('dblclick', 'li', function () {
+            $(this).children('span').attr('contentEditable', 'true').focus().keypress(function (event){
+                    var keycode = (event.keyCode ? event.keyCode : event.which);
+                    if (keycode == '13') {
+                        event.target.blur();
+                        $(this).children('span').attr('contenteditable', 'false');
+                        todoList.find(element => element.id == $(this).parent()[0].id).name = $(this).text();
+                        renderTodoList();
+                    }
+            });
+      });
+    });
